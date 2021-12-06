@@ -3,6 +3,7 @@ package name.avioli.unilinks;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 
 import androidx.annotation.NonNull;
 
@@ -27,7 +28,6 @@ public class UniLinksPlugin
 
     private BroadcastReceiver changeReceiver;
 
-    private String initialLink;
     private String latestLink;
     private Context context;
     private boolean initialIntent = true;
@@ -37,11 +37,12 @@ public class UniLinksPlugin
         String dataString = intent.getDataString();
 
         if (Intent.ACTION_VIEW.equals(action)) {
+            //todo check this part
             if (initialIntent) {
                 initialLink = dataString;
                 initialIntent = false;
             }
-            latestLink = dataString;
+            if (dataString!=null) latestLink = dataString;
             if (changeReceiver != null) changeReceiver.onReceive(context, intent);
         }
     }
@@ -101,6 +102,12 @@ public class UniLinksPlugin
     @Override
     public void onListen(Object o, EventChannel.EventSink eventSink) {
         changeReceiver = createChangeReceiver(eventSink);
+
+        //Go ahead and send the link on listen if we have one
+        if (latestLink != null && !latestLink.isEmpty()) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(latestLink));
+            if (changeReceiver != null) changeReceiver.onReceive(registrar.context(), intent);
+        }
     }
 
     @Override
@@ -111,9 +118,9 @@ public class UniLinksPlugin
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
         if (call.method.equals("getInitialLink")) {
-            result.success(initialLink);
-        } else if (call.method.equals("getLatestLink")) {
             result.success(latestLink);
+//        } else if (call.method.equals("getLatestLink")) {
+//            result.success(latestLink);
         } else {
             result.notImplemented();
         }
