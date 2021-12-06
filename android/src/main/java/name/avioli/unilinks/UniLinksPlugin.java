@@ -100,7 +100,7 @@ public class UniLinksPlugin
 
     private UniLinksPlugin(Registrar registrar) {
         this.registrar = registrar;
-        handleIntent(registrar.context(), registrar.activity().getIntent(), true);
+        handleIntent(registrar.context(), registrar.activity().getIntent());
     }
 
     @Override
