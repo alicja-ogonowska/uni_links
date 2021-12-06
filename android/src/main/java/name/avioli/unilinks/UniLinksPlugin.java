@@ -27,6 +27,7 @@ public class UniLinksPlugin
     private static final String EVENTS_CHANNEL = "uni_links/events";
 
     private BroadcastReceiver changeReceiver;
+    private Registrar registrar;
 
     private String latestLink;
     private Context context;
@@ -38,10 +39,10 @@ public class UniLinksPlugin
 
         if (Intent.ACTION_VIEW.equals(action)) {
             //todo check this part
-            if (initialIntent) {
-                initialLink = dataString;
-                initialIntent = false;
-            }
+//            if (initialIntent) {
+//                initialLink = dataString;
+//                initialIntent = false;
+//            }
             if (dataString!=null) latestLink = dataString;
             if (changeReceiver != null) changeReceiver.onReceive(context, intent);
         }
@@ -88,12 +89,17 @@ public class UniLinksPlugin
             return;
         }
 
-        final UniLinksPlugin instance = new UniLinksPlugin();
+        final UniLinksPlugin instance = new UniLinksPlugin(registrar);
         instance.context = registrar.context();
         register(registrar.messenger(), instance);
 
         instance.handleIntent(registrar.context(), registrar.activity().getIntent());
         registrar.addNewIntentListener(instance);
+    }
+
+    private UniLinksPlugin(Registrar registrar) {
+        this.registrar = registrar;
+        handleIntent(registrar.context(), registrar.activity().getIntent(), true);
     }
 
     @Override
